@@ -1,5 +1,6 @@
 package app;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -36,7 +37,7 @@ public abstract class ImportExport {
         switch (opt) {
             case 0://ex to list
                 try {
-                    FileSS.stringToFile(modelToList(con.getModel()), con.getView().fileChooser(1, con.getProperties().getProperty("defaultSavePath"))+".txt");
+                    FileSS.stringToFile(modelToList(con.getModel()), con.getView().fileChooser(FileDialog.SAVE, con.getProperties().getProperty("defaultSavePath")));
                 } catch (Exception e) {
                     //
                 }
@@ -44,7 +45,7 @@ public abstract class ImportExport {
                 break;
             case 1://ex to matrix
                 try {
-                    FileSS.stringToFile(modelToMatrix(con.getModel()), con.getView().fileChooser(1, con.getProperties().getProperty("defaultSavePath"))+".txt");
+                    FileSS.stringToFile(modelToMatrix(con.getModel()), con.getView().fileChooser(FileDialog.SAVE, con.getProperties().getProperty("defaultSavePath")));
                 } catch (Exception e) {
                     //
                 }
@@ -71,7 +72,7 @@ public abstract class ImportExport {
 
         String path;
         try {  
-            path = con.getView().fileChooser(0, con.getProperties().getProperty("defaultSavePath"));
+            path = con.getView().fileChooser(FileDialog.LOAD, con.getProperties().getProperty("defaultSavePath"));
         } catch (Exception e) {
             return;
         }
@@ -211,12 +212,12 @@ public abstract class ImportExport {
     }
 
     /**
-     * Konvertiert Adjazenzmatrix in Model [KAPUTT]
+     * Konvertiert Adjazenzmatrix in Model [KAPUTT], Lennis Tränen weilen hier
      * @param pAdjMatrix
      * @return
-     * @deprecated nicht benutzen
      */
-    public static Model modelFromMatrix(String pAdjMatrix){
+    @Deprecated
+    public static Model modelFromMatrixx(String pAdjMatrix){
         Model model = new Model();
 
         HashMap<Integer, Integer> oldIDS = new HashMap<Integer, Integer>();
@@ -316,11 +317,104 @@ public abstract class ImportExport {
         return model;
     }
 
+    /**
+     * Konvertiert Adjazenzmatrix in Model
+     * @param pAdjMatrix
+     * @return
+     */
+    public static Model modelFromMatrix(String pAdjMatrix){
+        Model model = new Model();
+
+        //clear whitespace
+        String text = "";
+        {
+            boolean inQuotes = false;
+            for (int i = 0; i < pAdjMatrix.toCharArray().length; i++) {
+                char ch = pAdjMatrix.toCharArray()[i];
+                if (ch == '"') {
+                    inQuotes = !inQuotes;
+                }
+                if (
+                        !Character.isWhitespace(ch)
+                                || inQuotes
+                                || ch == '\n'
+                ) {
+                    text += ch;
+                }
+            }
+        }
+
+        //divide into lines (with content)
+        List<String> lines = new ArrayList<String>();
+        {
+            int last = 0;
+            for (int i = 0; i < text.toCharArray().length; i++) {
+                if (text.toCharArray()[i] == '\n') {
+                    String line = text.substring(last, i);
+                    last = i + 1;
+                    if (!line.isBlank()) {
+                        lines.add(line);
+                    }
+                }
+            }
+        }
+
+        //create nodes, add names and remove from lines
+        List<String> connections = new ArrayList<String>();
+        {
+            for (String ln : lines) {
+                int nodeId = model.addNode();
+                if (ln.startsWith("\"")) {
+                    String name = "";
+                    int secondAp = 1;
+                    for (int j = 1; j < ln.toCharArray().length; j++) {
+                        if (ln.toCharArray()[j] == '"') {
+                            secondAp = j;
+                            name = ln.substring(1, secondAp);
+                            model.getNodePresentation(nodeId).setLabel(name);
+                            break;
+                        }
+                    }
+                    ln = ln.substring(secondAp + 1);
+                }
+                connections.add(ln);
+            }
+        }
+
+        //form edges
+        for (int j = 0; j < connections.size(); j++) {
+            String ln = connections.get(j);
+            //System.out.println(ln);
+            int i = 0;
+            int conTo = 0;
+            int last = 0;
+            do{
+                char ch = ln.toCharArray()[i];
+                if(ch==','){
+                    String dist = ln.substring(last,i);
+                    last = i+1;
+                    try{
+                        int ds = Integer.parseInt(dist);
+                        model.getGraph().addDirectedEdge(j,conTo,ds);
+                    }catch(Exception e){
+                        //no connection
+                    }
+                    conTo++;
+                }
+
+                i++;
+            }while(i<ln.length());
+        }
+
+        System.out.println(model.getGraph().toString());
+        return model;
+    }
+
     private static String r(String pKey){
         try{
             return res.getString(pKey);
         }catch(MissingResourceException e){
-            return "[COLKEY_"+pKey+"]";
+            return "[IMPEXKEY_"+pKey+"]";
         }
     }
 
@@ -350,7 +444,10 @@ public abstract class ImportExport {
 
         String ret = "";
         for (Node nodeFrom : nodes){
-            ret += nodeFrom.getId() + "\"" + pModel.getNodePresentation(nodeFrom.getId()).getLabel() + "\"";
+            String lb = pModel.getNodePresentation(nodeFrom.getId()).getLabel();
+            if(!lb.isBlank()){
+                ret += "\"" + lb + "\"";
+            }
             for (Node nodeTo : nodes) {
                 if(!pModel.getGraph().hasEdgeTo(nodeFrom.getId(), nodeTo.getId())){
                     ret += "X, ";
