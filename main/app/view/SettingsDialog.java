@@ -574,10 +574,12 @@ public abstract class SettingsDialog{
         File[] files = dir.listFiles();
 
         List<String> ret = new ArrayList<String>();
-        for (int i = 0; i < files.length; i++) {
-            ret.add(files[i].toString());
+        if (files != null) {
+            for (File file : files) {
+                ret.add(file.toString());
+            }
         }
-        
+
         return ret;
     }
 

@@ -268,6 +268,7 @@ public class Controller {
      * Überträgt Knotenkomponente in Modell
      * @param pId Id des zu übertragenden Knotens
      */
+    /*stoopid
     public void nodeComponentToModel(int pId){
         NodeComponent nc = getView().getContentPanel().getNodeById(pId);
         String col;
@@ -280,6 +281,7 @@ public class Controller {
         
         getModel().saveNodePres(pId, nc.getPositionX(), nc.getPositionY(), nc.getLabel(), col);
     }
+     */
 
     /**
      * Überträgt Position einer Knotenkomponente in Modell
@@ -447,10 +449,6 @@ public class Controller {
      */
     public boolean saveGraph(String pPath, boolean pSetPath){
         if(pPath==null)return false;
-
-        for (int id : getModel().getIds()){
-            nodeComponentToModel(id);
-        }
 
         Model gm = getModel();
         boolean suc = FileSS.saveToFile(gm,pPath);

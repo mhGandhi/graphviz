@@ -1,9 +1,11 @@
 package app;
 
 import app.model.Model;
+import app.model.NodePresentation;
 import app.view.EdgeComponent;
 import app.view.NodeComponent;
 import app.view.RedrawModes;
+import app.view.Theme;
 import app.view.point.ActualPoint;
 
 import java.awt.*;
@@ -326,14 +328,15 @@ public class ActionHandler {
         if(pN.length==1){
             String oldName = getNodeById(pN[0]).getLabel();
             if(newName.equals(oldName))
-            return;
+                return;
         }
-        
-        
-        for (int i = 0; i < pN.length; i++) {
-            NodeComponent nc = getController().getView().getContentPanel().getNodeById(pN[i]);
-            nc.setLabel(newName);
-            getController().nodeComponentToModel(pN[i]);
+
+
+        for (int nodeId : pN) {
+            //NodeComponent nc = getController().getView().getContentPanel().getNodeById(pN[i]);
+            NodePresentation np = getController().getModel().getNodePresentation(nodeId);
+            np.setLabel(newName);
+            getController().modelToComponentList();
         }
 
         redraw_Rescale();
@@ -396,23 +399,34 @@ public class ActionHandler {
      */
     public void recolourNode(int pN){
 
-        NodeComponent nc = getController().getView().getContentPanel().getNodeById(pN);
-        Color oldCol = nc.getColor();
+        //NodeComponent nc = getController().getView().getContentPanel().getNodeById(pN);
+        NodePresentation np = getController().getModel().getNodePresentation(pN);
+        Color oldCol;
+        if(np.getColorCode()==null){
+            oldCol = null;
+        }
+        else{
+            oldCol = Theme.decodeColor(np.getColorCode());
+        }
         Color newCol;
 
         //erfragung der Farbe
         try {
-            newCol = getController().getView().colorDialog(nc.getColor());
+            newCol = getController().getView().colorDialog(oldCol);
             if(newCol.equals(getController().getView().getViewState().getTheme().getDefaultNodeColor())){
                 newCol = null;
             }
         } catch(Exception e){
             newCol = null;
         }
-        
-        nc.setColor(newCol);
 
-        getController().nodeComponentToModel(pN);
+        if(newCol==null){
+            np.setColorCode(null);
+        }else {
+            np.setColorCode(Theme.encodeColor(newCol));
+        }
+
+        getController().modelToComponentList();
 
         if(
             (
