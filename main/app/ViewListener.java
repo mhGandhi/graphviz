@@ -1,5 +1,6 @@
 package app;
 
+import app.model.NodePresentation;
 import app.view.NodeComponent;
 import app.view.ViewState;
 import app.view.point.ActualPoint;
@@ -417,8 +418,21 @@ public class ViewListener implements ActionListener, KeyListener, MouseListener,
                 getActionHandler().redraw_None();
                 break;
             case 1://wenn mit linker Maustaste gezogen
-                if(nodeAR>=0&&1<=pressPos.distTo(e.getX(), e.getY())){
-                    getActionHandler().syncPosToModel(nodeAR);
+                if((selectedNodes!=null||nodeAR>=0)&&1<=pressPos.distTo(e.getX(), e.getY())){
+                    //getActionHandler().syncPosToModel(nodeAR);
+                    if(selectedNodes!=null){
+                        for (int node: selectedNodes){
+                            NodePresentation np = getActionHandler().getController().getModel().getNodePresentation(node);
+                            NodeComponent nc = getActionHandler().getNodeById(node);
+                            np.setPos(nc.getPositionX(), nc.getPositionY());
+                        }
+                    }else{
+                        NodePresentation np = getActionHandler().getController().getModel().getNodePresentation(nodeAR);
+                        NodeComponent nc = getActionHandler().getNodeById(nodeAR);
+                        np.setPos(nc.getPositionX(), nc.getPositionY());
+                    }
+
+                    getActionHandler().redraw_Rescale();
                 }
                 break;
             default:

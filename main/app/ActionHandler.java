@@ -501,9 +501,12 @@ public class ActionHandler {
      * ruft syncPosToModel()-Methode des Controllers auf
      * @param pId
      */
+    /*
     public void syncPosToModel(int pId){
         getController().syncPosToModel(pId);
     }
+
+     */
 
     /**
      * ruft hasEdgeTo()-Methode des Graphen auf

@@ -268,7 +268,7 @@ public class Controller {
      * Überträgt Knotenkomponente in Modell
      * @param pId Id des zu übertragenden Knotens
      */
-    /*stoopid
+    @Deprecated
     public void nodeComponentToModel(int pId){
         NodeComponent nc = getView().getContentPanel().getNodeById(pId);
         String col;
@@ -278,20 +278,21 @@ public class Controller {
         } catch (Exception e) {
             col = null;
         }
-        
+
         getModel().saveNodePres(pId, nc.getPositionX(), nc.getPositionY(), nc.getLabel(), col);
     }
-     */
 
     /**
      * Überträgt Position einer Knotenkomponente in Modell
      * @param pId Id des Knotens
      */
+    /*goof
     public void syncPosToModel(int pId){
         NodeComponent nc = getView().getContentPanel().getNodeById(pId);
 
         getModel().syncNodePos(pId, nc.getPositionX(), nc.getPositionY());
     }
+     */
 
     /**
      * Löscht Knoten aus Model und Komponentenliste
