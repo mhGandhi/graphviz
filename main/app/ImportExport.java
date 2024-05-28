@@ -359,23 +359,29 @@ public abstract class ImportExport {
             }
         }
 
-        //create nodes, add names and remove from lines
+        //apply meta
         List<String> connections = new ArrayList<String>();
         {
             for (String ln : lines) {
                 int nodeId = model.addNode();
-                if (ln.startsWith("\"")) {
-                    String name = "";
-                    int secondAp = 1;
-                    for (int j = 1; j < ln.toCharArray().length; j++) {
-                        if (ln.toCharArray()[j] == '"') {
-                            secondAp = j;
-                            name = ln.substring(1, secondAp);
-                            model.getNodePresentation(nodeId).setLabel(name);
+                if(ln.endsWith("}")){
+                    for (int i = 0; i < ln.length(); i++) {
+                        char ch = ln.toCharArray()[i];
+                        if(ch=='{'){
+                            try{
+                                NodePresentation mockPres = metaToNodePres(ln.substring(i));
+                                model.getNodePresentation(nodeId).setLabel(mockPres.getLabel());
+                                model.getNodePresentation(nodeId).setPosX(mockPres.getPosX());
+                                model.getNodePresentation(nodeId).setPosY(mockPres.getPosY());
+                                model.getNodePresentation(nodeId).setColorCode(mockPres.getColorCode());
+                            }catch(Exception e){
+                                //
+                            }
+
+                            ln = ln.substring(0,i);
                             break;
                         }
                     }
-                    ln = ln.substring(secondAp + 1);
                 }
                 connections.add(ln);
             }
@@ -405,8 +411,6 @@ public abstract class ImportExport {
                 i++;
             }while(i<ln.length());
         }
-
-        System.out.println(model.getGraph().toString());
         return model;
     }
 
@@ -418,7 +422,7 @@ public abstract class ImportExport {
         }
     }
 
-
+    //TODO meta system auch bei dem andern noch benutzen hihi
     /**
      * Konvertiert Model in Adjazenzmatrix
      * @param pModel
@@ -444,10 +448,6 @@ public abstract class ImportExport {
 
         String ret = "";
         for (Node nodeFrom : nodes){
-            String lb = pModel.getNodePresentation(nodeFrom.getId()).getLabel();
-            if(!lb.isBlank()){
-                ret += "\"" + lb + "\"";
-            }
             for (Node nodeTo : nodes) {
                 if(!pModel.getGraph().hasEdgeTo(nodeFrom.getId(), nodeTo.getId())){
                     ret += "X, ";
@@ -460,7 +460,7 @@ public abstract class ImportExport {
                     }
                 }
             }
-            ret += "\n";
+            ret += nodePresToMeta(pModel.getNodePresentation(nodeFrom.getId()))+"\n";
         }
         return ret;
     }
@@ -483,4 +483,98 @@ public abstract class ImportExport {
         }
         return ret;
     }
+
+    /**
+     * Konvertiert meta-String in Mock-NodePresentation (ohne assoziierten Knoten) mit angewandten Dingenses
+     * @param pMeta
+     * @return
+     */
+    private static NodePresentation metaToNodePres(String pMeta){
+        NodePresentation np = new NodePresentation(-1);
+        for (int i = 0; i < pMeta.toCharArray().length; i++) {
+            char ch = pMeta.toCharArray()[i];
+
+            if(ch=='['){
+                //System.out.println("found pos");
+                int divideInd = -1;
+                for (int j = i; j < pMeta.toCharArray().length; j++) {
+                    char ch2 = pMeta.toCharArray()[j];
+
+                    if(ch2=='|'){
+                        divideInd = j;
+                    }
+                    if(ch2==']'){
+                        double posX = 0;
+                        double posY = 0;
+                        try{
+                            if(divideInd>0)
+                                posX = Double.parseDouble(pMeta.substring(i+1,divideInd));
+                        }catch (Exception e){
+                            //no x pos
+                        }
+                        try{
+                            if(divideInd>0)
+                                posY = Double.parseDouble(pMeta.substring(divideInd+1,j));
+                        }catch (Exception e){
+                            //no y pos
+                        }
+                        np.setPos(posX,posY);
+                        i=j;
+                        break;
+                    }
+                }
+            }
+
+            if(ch=='"'){
+                //System.out.println("found name");
+                for (int j = i+1; j < pMeta.toCharArray().length; j++) {
+                    char ch2 = pMeta.toCharArray()[j];
+                    //System.out.println(j);
+                    if(ch2=='"'){
+                        np.setLabel(pMeta.substring(i+1,j));
+                        //System.out.printf(np.getLabel());
+                        i = j+1;
+                        break;
+                    }
+                }
+            }
+
+            if(ch=='('){
+                //System.out.println("found col");
+                for (int j = i; j < pMeta.toCharArray().length; j++) {
+                    char ch2 = pMeta.toCharArray()[j];
+                    if(ch2==')'){
+                        String colorCode = pMeta.substring(i+1,j);
+                        np.setColorCode(colorCode);
+                        i = j+1;
+                        break;
+                    }
+                }
+            }
+        }
+        return np;
+    }
+
+    /**
+     * Konvertiert NodePresentation mit angewandten dingens in meta-String
+     * @param pNp
+     * @return meta
+     */
+    private static String nodePresToMeta(NodePresentation pNp){
+        String ret = "";
+        ret += "{";
+
+        ret += "[" + pNp.getPosX() + "|" + pNp.getPosY() + "]";
+        if(!pNp.getLabel().isBlank()){
+            ret += "\"" + pNp.getLabel() + "\"";
+        }
+        if(pNp.getColorCode()!=null){
+            ret += "(" + pNp.getColorCode() + ")";
+        }
+
+        ret += "}";
+        return ret;
+    }
+
+
 }
