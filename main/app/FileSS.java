@@ -63,7 +63,7 @@ public abstract class FileSS {
                 sb.append(line).append("\n");
             }
         } catch (IOException e) {
-            e.printStackTrace(); 
+            //e.printStackTrace();
         }
         return sb.toString();
     }

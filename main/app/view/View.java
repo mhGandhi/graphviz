@@ -47,10 +47,6 @@ public class View{
         return this.pane;
     }
 
-    public static ResourceBundle getBundleForLanguage(Locale pL){
-        return ResourceBundle.getBundle("lgs/lang",pL);
-    }
-
     public ResourceBundle getResourceBundle(){
         return this.r;
     }

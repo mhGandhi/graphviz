@@ -6,6 +6,7 @@ import app.model.NodePresentation;
 import app.view.*;
 import app.view.point.InSysPoint;
 
+import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.event.ActionEvent;
 import java.io.*;
@@ -116,18 +117,6 @@ public class Controller {
                                         FileSystemView.getFileSystemView().getDefaultDirectory().getPath()+"\\GraphVisualizer");
         }
         String loc = Locale.getDefault().toString();
-
-        //sucht gültige Referenz auf eine verfügbare Sprache
-        Locale dLoc = Locale.forLanguageTag(getProperties().getProperty("slLang"));
-        if(dLoc.getCountry().isBlank()){
-            try {
-                Controller.getBundleFromFile(getProperties().getProperty("slLang"));
-                loc = getProperties().getProperty("slLang");
-            } catch (Exception ex) {   
-            }
-        }else{
-            loc = dLoc.toString();
-        }    
         
         //läd Theme aus Datei
         Theme theme;
@@ -160,23 +149,33 @@ public class Controller {
         }
 
         this.tools = pTools;
-        
         this.model = new Model();
 
+
+        //sucht gültige Referenz auf eine verfügbare Sprache
+        System.out.println("init lang");
+        String selectedLang = getProperties().getProperty("slLang");
         ResourceBundle res;
-        try {
-            res = Controller.getBundleFromFile(loc);
-        } catch (Exception e) {
-            System.out.println(loc+" no path");
-            try {
-                res = View.getBundleForLanguage(Locale.forLanguageTag(loc));
-            } catch (Exception ex) {
-                System.out.println(loc+" no tag");
-                res = View.getBundleForLanguage(Locale.getDefault());
+        if(selectedLang.isBlank()){
+            selectedLang = Locale.getDefault().getLanguage();
+            System.out.println("\tno lang selected, reverting to "+selectedLang);
+            getProperties().setProperty("slLang", selectedLang);
+        }
+
+        res = Controller.getBundleFromFile(getProperties().getProperty("slLang"));
+        if(res == null){
+            System.out.println("\tno path");
+            res = Controller.getBundleForLanguage( Locale.forLanguageTag(selectedLang) );
+            if(res==null) {
+                System.out.println("\tno accepted tag");
+                res = Controller.getBundleFromFile("lgs/lang.properties");
+                getProperties().setProperty("slLang", "lgs/lang.properties");
             }
         }
-        if(res==null){
-            res = Controller.getBundleFromFile("lgs\\lang.properties");
+        //check if language was applied
+        if(res == null){
+            System.err.printf("no language found, add file lgs/lang.properties");
+            exit();
         }
 
 
@@ -526,6 +525,15 @@ public class Controller {
             //e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * Gibt Sprache der Locale zurück.
+     * @param pL
+     * @return
+     */
+    public static ResourceBundle getBundleForLanguage(Locale pL){
+        return ResourceBundle.getBundle("lgs/lang",pL);
     }
 
     /**
