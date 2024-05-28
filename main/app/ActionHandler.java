@@ -501,12 +501,10 @@ public class ActionHandler {
      * ruft syncPosToModel()-Methode des Controllers auf
      * @param pId
      */
-    /*
+    @Deprecated
     public void syncPosToModel(int pId){
         getController().syncPosToModel(pId);
     }
-
-     */
 
     /**
      * ruft hasEdgeTo()-Methode des Graphen auf

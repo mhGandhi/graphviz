@@ -286,13 +286,12 @@ public class Controller {
      * Überträgt Position einer Knotenkomponente in Modell
      * @param pId Id des Knotens
      */
-    /*goof
+    @Deprecated
     public void syncPosToModel(int pId){
         NodeComponent nc = getView().getContentPanel().getNodeById(pId);
 
         getModel().syncNodePos(pId, nc.getPositionX(), nc.getPositionY());
     }
-     */
 
     /**
      * Löscht Knoten aus Model und Komponentenliste
