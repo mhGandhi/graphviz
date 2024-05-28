@@ -326,23 +326,7 @@ public abstract class ImportExport {
         Model model = new Model();
 
         //clear whitespace
-        String text = "";
-        {
-            boolean inQuotes = false;
-            for (int i = 0; i < pAdjMatrix.toCharArray().length; i++) {
-                char ch = pAdjMatrix.toCharArray()[i];
-                if (ch == '"') {
-                    inQuotes = !inQuotes;
-                }
-                if (
-                        !Character.isWhitespace(ch)
-                                || inQuotes
-                                || ch == '\n'
-                ) {
-                    text += ch;
-                }
-            }
-        }
+        String text = clearWhitespace(pAdjMatrix);
 
         //divide into lines (with content)
         List<String> lines = new ArrayList<String>();
@@ -573,6 +557,30 @@ public abstract class ImportExport {
         }
 
         ret += "}";
+        return ret;
+    }
+
+    /**
+     * entfernt Whitespace aus gegebenem String (abgesehen newline und solche in Anführungszeichen)
+     * @param pOriginalString
+     * @return
+     */
+    private static String clearWhitespace(String pOriginalString){
+        String ret = "";
+        boolean inQuotes = false;
+        for (int i = 0; i < pOriginalString.toCharArray().length; i++) {
+            char ch = pOriginalString.toCharArray()[i];
+            if (ch == '"') {
+                inQuotes = !inQuotes;
+            }
+            if (
+                    !Character.isWhitespace(ch)
+                            || inQuotes
+                            || ch == '\n'
+            ) {
+                ret += ch;
+            }
+        }
         return ret;
     }
 

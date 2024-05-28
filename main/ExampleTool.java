@@ -52,7 +52,7 @@ public class ExampleTool implements Tool{
      */
     @Override
     public boolean canBeRanFromMenuBar() {
-        return true;
+        return false;
     }
 
     /**
@@ -60,7 +60,7 @@ public class ExampleTool implements Tool{
      */
     @Override
     public boolean canBeRanFromNode() {
-        return true;
+        return false;
     }
 
     /**
@@ -68,7 +68,7 @@ public class ExampleTool implements Tool{
      */
     @Override
     public boolean canBeRanFromSpot() {
-        return true;
+        return false;
     }
     //
     /**
