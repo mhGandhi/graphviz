@@ -108,7 +108,7 @@ public class ContentPanel extends JPanel{
         this.edges = new LinkedList<EdgeComponent>();
 
         setBackground(getViewState().getTheme().getBackgroundColor());
-        setPreferredSize(new Dimension(500,500));
+        setPreferredSize(new Dimension(720,500));
         setLayout(null);
     }
 
