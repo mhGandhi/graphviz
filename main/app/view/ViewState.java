@@ -96,8 +96,8 @@ public class ViewState {
     }
 
     public void setZoom(double pZoom) {
-        if (pZoom<10)pZoom = 10;
-        if (pZoom>500) pZoom = 500; 
+        if (pZoom<5)pZoom = 5;
+        if (pZoom>800) pZoom = 800;
         this.zoom = pZoom;
     }
 
