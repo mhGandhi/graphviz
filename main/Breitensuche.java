@@ -25,6 +25,7 @@ import java.util.*;
 import app.ActionHandler;
 import app.Controller;
 import app.Tool;
+import app.model.Edge;
 import app.model.Graph;
 import app.model.Node;
 import app.view.ContentPanel;
@@ -81,6 +82,7 @@ class Graph {
 public class Breitensuche implements Tool {
 
     // Breitensuche Algorithmus
+    @Deprecated
     public void breitensuche(int pStart, Controller pC) {
 
         // Markiere den Startknoten als besucht und füge ihn in die Warteschlange ein
@@ -116,11 +118,13 @@ public class Breitensuche implements Tool {
     }
 
     // Überprüfe, ob ein Knoten bereits besucht wurde
+    @Deprecated
     private boolean nodeIsVisited(int nodeId, Controller pC) {
         NodeComponent node = pC.getView().getContentPanel().getNodeById(nodeId);
         return node.isMarked();
     }
 
+    @Deprecated
     private boolean edgeIsVisited(int nodeId, Controller pC) {
         EdgeComponent edge = pC.getView().getContentPanel().getEdges().get(nodeId);
         return edge.isMarked();
@@ -134,9 +138,10 @@ public class Breitensuche implements Tool {
     }
 
     public void runFromMenuBar(Controller pC){
-        System.out.println("Exampletool from Menubar");
         int n = pC.getView().nodeDialog();
-        System.out.println("selected node "+n);
+        if(n>=0){
+            runOnNode(pC, n);
+        }
     }
 
 
@@ -161,7 +166,7 @@ public class Breitensuche implements Tool {
 
     @Override
     public boolean canBeRanFromMenuBar() {
-        return false;
+        return true;
     }
 
     @Override
@@ -182,19 +187,44 @@ public class Breitensuche implements Tool {
 
     @Override
     public void runOnNode(Controller pC, int pNodeId) {
-        // Erstelle einen Graphen mit Knoten und Kanten
-        Graph graph = pC.getModel().getGraph();
-        int startNode = pNodeId;
-        // Füge weitere Knoten und Kanten hinzu...
-
-        // Führe Breitensuche aus
-        breitensuche(startNode, pC);
+        broadSearch(pNodeId, pC);
         pC.getView().redraw(RedrawModes.RESCALE);
     }
 
     @Override
     public void runAtSpot(Controller pC, InSysPoint pPt) {
         //
+    }
+
+    /**
+     *
+     * @param pStartNode Anfangspunkt
+     * @param pC Controller
+     */
+    public void broadSearch(int pStartNode, Controller pC){
+        Collection<Integer> visitedNodes = new LinkedList<Integer>();
+        Queue<Integer> nextToVisit = new LinkedList<>();
+
+        nextToVisit.add(pStartNode);
+        //int count = 0;
+        while(!nextToVisit.isEmpty()){
+            int currentNode = nextToVisit.remove();
+
+            visitedNodes.add(currentNode);
+            pC.getView().getContentPanel().getNodeById(currentNode).setMarked(true);
+            //pC.getView().getContentPanel().getNodeById(currentNode).setLabel(count+"");
+            //count++;
+
+            List<Edge> outEdges = pC.getModel().getGraph().getOutEdges(currentNode);
+            outEdges.sort(Comparator.comparingInt(Edge::getWeight));
+
+            for (Edge e : outEdges){
+                if(!visitedNodes.contains(e.getNode().getId()) && !nextToVisit.contains(e.getNode().getId())){
+                    pC.getView().getContentPanel().setEdgeMarked(currentNode, e.getNode().getId(), true);
+                    nextToVisit.add(e.getNode().getId());
+                }
+            }
+        }
     }
 }
 
