@@ -187,6 +187,7 @@ public class Breitensuche implements Tool {
 
     @Override
     public void runOnNode(Controller pC, int pNodeId) {
+        pC.removeMarkings();
         broadSearch(pNodeId, pC);
         pC.getView().redraw(RedrawModes.RESCALE);
     }
