@@ -305,4 +305,21 @@ public class Graph implements Serializable{
         Graph compGraph = (Graph) obj;
         return this.getAdjList().equals(compGraph.getAdjList());
     }
+
+    /**
+     * Gibt Liste an mündenden, umgekehrten Kanten des Knotens mit der Id zurück.
+     * @param pId   Id des Knotens, dessen eingehende Kanten gesucht werden.
+     * @return      Liste mit allen ausgehenden Kanten.
+     */
+    public List<Edge> getRevInEdges(int pId) {
+        List<Edge> ret = new LinkedList<Edge>();
+        for (Node n : getAdjList().keySet()){
+            for (Edge e : getAdjList().get(n)){
+                if(e.getNode().getId()==pId){
+                    ret.add(new Edge(e.getWeight(),n));
+                }
+            }
+        }
+        return ret;
+    }
 }
