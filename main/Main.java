@@ -11,7 +11,8 @@ public class Main {
     public static Tool[] tools = {
         new ExampleTool(),
         new Breitensuche(),
-		new Tiefensuche()
+		new Tiefensuche(),
+        new Path()
         //,[...]
     };
 
