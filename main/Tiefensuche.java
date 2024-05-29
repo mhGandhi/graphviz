@@ -9,8 +9,7 @@ import app.model.Graph;
 import app.model.Node;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import app.Controller;
 
@@ -96,7 +95,7 @@ public class Tiefensuche implements Tool{
      */
     @Override
     public void runOnNode(Controller pC, int pNodeId) {
-        tiefensuche(pNodeId, pC);
+        depthSearch(pNodeId, pC);
     }
 
     /**
@@ -108,39 +107,37 @@ public class Tiefensuche implements Tool{
     }
 
     /**
-     * @param pStart
-     * @param pGraph
-     * @param pView
+     *
+     * @param pStartNode
+     * @param pC
      */
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
-   
+    private void depthSearch(int pStartNode, Controller pC){
+        Collection<Integer> visitedNodes = new LinkedList<Integer>();
+
+        depthSearchRec(pStartNode, pC, visitedNodes);
+    }
+
+    /**
+     *
+     * @param pCurrentNode
+     * @param pC
+     * @param pVisitedNodes
+     */
+    private void depthSearchRec(int pCurrentNode, Controller pC, Collection<Integer> pVisitedNodes){
+        pVisitedNodes.add(pCurrentNode);
+        pC.getView().getContentPanel().getNodeById(pCurrentNode).setMarked(true);
+        List<Edge> outEdges = pC.getModel().getGraph().getOutEdges(pCurrentNode);
+
+        outEdges.sort(Comparator.comparingInt(Edge::getWeight));
+
+        for(Edge e: outEdges){
+            if(!pVisitedNodes.contains(e.getNode().getId())){
+                pC.getView().getContentPanel().setEdgeMarked(pCurrentNode, e.getNode().getId(), true);
+
+                depthSearchRec(e.getNode().getId(), pC, pVisitedNodes);
+            }
+        }
+    }
    
    
   /*  
@@ -296,6 +293,7 @@ public class Tiefensuche implements Tool{
     }
     */     
 
+    @Deprecated
     private void tiefensuche(int pStart, Controller pC) {
         System.out.println("Startknoten ID:" + pStart);
         
@@ -331,6 +329,7 @@ public class Tiefensuche implements Tool{
     }
     
     // Macht die Tiefensuche rekursiv
+    @Deprecated
     private void tiefensucheRekursiv(int currentNode, Controller pC, List<Integer> unbesucht, List<Integer> besucht) {
         System.out.println("Besuche Knoten ID: " + currentNode);
     
