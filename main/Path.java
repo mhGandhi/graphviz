@@ -102,9 +102,9 @@ public class Path implements Tool{
         Map<Integer,Integer> dists = getDijkDists(pNodeId, pC.getModel().getGraph());
 
         //Distanzen ersichtlich machen
-        for(int nd : dists.keySet()){
-            pC.getView().getContentPanel().getNodeById(nd).setLabel(""+dists.get(nd));
-        }
+        //for(int nd : dists.keySet()){
+        //    pC.getView().getContentPanel().getNodeById(nd).setLabel(""+dists.get(nd));
+        //}
 
         drawPathByDists(dists, pC, destination);
 
