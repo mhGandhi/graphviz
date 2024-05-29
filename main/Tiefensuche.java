@@ -96,6 +96,7 @@ public class Tiefensuche implements Tool{
     @Override
     public void runOnNode(Controller pC, int pNodeId) {
         depthSearch(pNodeId, pC);
+        pC.getView().redraw(RedrawModes.RESCALE);
     }
 
     /**
@@ -113,7 +114,6 @@ public class Tiefensuche implements Tool{
      */
     private void depthSearch(int pStartNode, Controller pC){
         Collection<Integer> visitedNodes = new LinkedList<Integer>();
-
         depthSearchRec(pStartNode, pC, visitedNodes);
     }
 
