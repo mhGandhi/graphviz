@@ -166,7 +166,7 @@ public class Breitensuche implements Tool {
 
     @Override
     public boolean canBeRanFromMenuBar() {
-        return true;
+        return false;
     }
 
     @Override
@@ -194,7 +194,7 @@ public class Breitensuche implements Tool {
 
     @Override
     public void runAtSpot(Controller pC, InSysPoint pPt) {
-        //
+        runFromMenuBar(pC);
     }
 
     /**
