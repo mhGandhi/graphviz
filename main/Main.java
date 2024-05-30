@@ -12,7 +12,8 @@ public class Main {
         new ExampleTool(),
         new Breitensuche(),
 		new Tiefensuche(),
-        new Path()
+        new Path(),
+        new LiveTiefensuche()
         //,[...]
     };
 
