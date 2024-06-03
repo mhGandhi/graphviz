@@ -285,18 +285,10 @@ public class ContentPanel extends JPanel{
      */
     private void paintComp(CComponent pC, Graphics2D g2d){
         switch (getNextRedrawMode()) {
-            case RESCALE:
-                pC.paintCompAZ(g2d, getVisibleRect());
-                break;
-            case MOVE:
-                pC.paintCompAM(g2d, getVisibleRect());
-                break;
-            case NONE:
-                pC.paintComp(g2d, getVisibleRect());
-                break;
-            default:
-                pC.paintCompAZ(g2d, getVisibleRect());
-                break;
+            case RESCALE -> pC.paintCompAZ(g2d, getVisibleRect());
+            case MOVE -> pC.paintCompAM(g2d, getVisibleRect());
+            case NONE -> pC.paintComp(g2d, getVisibleRect());
+            default -> pC.paintCompAZ(g2d, getVisibleRect());
         }
     }
 
