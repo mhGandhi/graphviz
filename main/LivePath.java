@@ -132,7 +132,7 @@ public class LivePath implements Tool{
 
         @Override
         public void run() {
-            Map<Integer,Integer> dists = dijkDists(startNode, controller, destinationNode);
+            Map<Integer,Integer> dists = dijkDists(startNode, controller);
 
             if(dists.get(destinationNode)==null){
                 controller.getView().nativeNotification("Kein Pfad zum Ziel");
@@ -164,17 +164,29 @@ public class LivePath implements Tool{
                     }
                     updateViz(0.5d);
                 }
+                for (int n : visitedNodes) {
+                    Color color = null;
+                    if (col.get(n) != null) {
+                        color = Theme.decodeColor(col.get(n));
+                    } else {
+                        color = controller.getView().getViewState().getTheme().getDefaultNodeColor();
+                    }
+                    controller.getView().getContentPanel().getNodeById(n).setColor(color);
+                }
+                updateViz(0.5d);
             }
 
+            //todo weg rein
             controller.getView().redraw(RedrawModes.RESCALE);
         }
 
         /**
-         *
+         * Errechnet mindeste Distanz zum Startknoten mithilfe des Dijkstra-Algorithms
          * @param pStartNode Anfangsknoten
          * @param pC Controller
+         * @return Zuordnung der Knoten-Ids zu ihren entsprechenden Distanzen
          */
-        private Map<Integer,Integer> dijkDists(int pStartNode, Controller pC, int pDestinationNode){
+        private Map<Integer,Integer> dijkDists(int pStartNode, Controller pC){//todo modus der nur mindest erforderliche distanzen errechnet???
             Map<Integer,Integer> dists = new TreeMap<Integer,Integer>();
             Collection<Integer> done = new LinkedList<Integer>();
             List<Integer> toDo = new LinkedList<Integer>();
@@ -182,10 +194,9 @@ public class LivePath implements Tool{
             toDo.add(pStartNode);
             dists.put(pStartNode, 0);
 
-
             while(!toDo.isEmpty()){
                 int cur = toDo.get(0);
-                {
+                {//setze cur auf den Knoten mit der geringsten Distanz zum Start
                     int min = Integer.MAX_VALUE;
                     for(int id:toDo){
                         int dist = Objects.requireNonNullElse(dists.get(id), Integer.MAX_VALUE);
@@ -195,78 +206,95 @@ public class LivePath implements Tool{
                         }
                     }
                     toDo.remove(Integer.valueOf(cur));
-                }
-                if(done.contains(cur)){
-                    break;
+                    if(done.contains(cur)){//wenn alle fertig abbruch
+                        break;
+                    }
                 }
 
-                pC.getView().getContentPanel().getNodeById(cur).setColor(Color.WHITE);
-                pC.getView().getContentPanel().getNodeById(cur).setMarked(true);
-                updateViz(2d);
+                {//MARK aktuell bearbeiteten Knoten markieren
+                    pC.getView().getContentPanel().getNodeById(cur).setColor(Color.WHITE);
+                    pC.getView().getContentPanel().getNodeById(cur).setMarked(true);
+                    updateViz(2d);
+                }
 
                 List<Edge> outEdges = pC.getModel().getGraph().getOutEdges(cur);
                 outEdges.sort(Comparator.comparingInt(Edge::getWeight));
-
-                for(Edge e : outEdges){
+                for(Edge e : outEdges){//für jede ausgehende Kante des aktuellen Knotens (aufsteigend nach Gewicht)
                     int neighbour = e.getNode().getId();
-                    if(!done.contains(neighbour)){
+
+                    if(!done.contains(neighbour)){//insofern noch nicht bearbeitet
+                        //Distanz des Nachbarn zum Start, wenn über aktuellen Knoten gegangen wird
                         int newDist = e.getWeight()+dists.get(cur);
 
-                        pC.getView().getContentPanel().setEdgeMarked(cur, neighbour, true);
-                        pC.getView().getContentPanel().getNodeById(neighbour).setMarked(true);
-                        {
+                        {//MARK aktuell untersuchten Nachbar markieren
+                            pC.getView().getContentPanel().setEdgeMarked(cur, neighbour, true);
+                            pC.getView().getContentPanel().getNodeById(neighbour).setMarked(true);
                             int dist = Objects.requireNonNullElse(dists.get(neighbour), Integer.MAX_VALUE);
                             pC.getView().getContentPanel().getNodeById(neighbour).setLabel(
                                     newDist+" < "+ (dist==Integer.MAX_VALUE ? "∞" : dist) +" ?"
                             );
+                            updateViz(1.5d);
+                            //Markierungen schonmal wieder entfernen
+                            pC.getView().getContentPanel().setEdgeMarked(cur, neighbour, false);
+                            pC.getView().getContentPanel().getNodeById(neighbour).setMarked(false);
                         }
-                        updateViz(1.5d);
-                        pC.getView().getContentPanel().setEdgeMarked(cur, neighbour, false);
-                        pC.getView().getContentPanel().getNodeById(neighbour).setMarked(false);
 
+                        //wenn neue Distanz kleiner als bisher berechnete
                         if(newDist < Objects.requireNonNullElse(dists.get(neighbour), Integer.MAX_VALUE)){
-                            dists.put(neighbour, newDist);
-                            pC.getView().getContentPanel().getNodeById(neighbour).setColor(Color.BLUE);
-                            pC.getView().getContentPanel().getNodeById(neighbour).setLabel(newDist+"");
+                            dists.put(neighbour, newDist);//Distanz aktualisieren
+                            {//MARK mit neuer Distanz markieren
+                                pC.getView().getContentPanel().getNodeById(neighbour).setColor(Color.BLUE);
+                                pC.getView().getContentPanel().getNodeById(neighbour).setLabel(newDist+"");
+                            }
                         }else{
-                            pC.getView().getContentPanel().getNodeById(neighbour).setLabel(dists.get(neighbour)+"");
+                            {//MARK sonst wieder mit bisheriger Distanz markieren
+                                pC.getView().getContentPanel().getNodeById(neighbour).setLabel(dists.get(neighbour)+"");
+                            }
                         }
 
-                        {
+                        {//überprüfen, ob es sich bei aktuell untersuchtem Nachbar um Sackgasse handelt
                             boolean deadEnd = true;
-                            //System.out.println("\n checking if "+ e.getNode().getId()+ " is deadEnd");
+                            //für jede vom Nachbarn ausgehende Kante
                             for (Edge check:pC.getModel().getGraph().getOutEdges(neighbour) ){
+                                //wenn weder fertig, noch der Knoten von dem die Untersuchung ausging
                                 if(!done.contains(check.getNode().getId()) && check.getNode().getId()!=cur){
-                                    //System.out.println(e.getNode().getId() + " wegen " + check.getNode().getId() + " kein deadEnd");
                                     deadEnd = false;
                                     break;
                                 }
                             }
-                            //System.out.println(e.getNode().getId()+" deadend "+deadEnd);
                             if(deadEnd){
-                                pC.getView().getContentPanel().getNodeById(neighbour).setColor(Color.GREEN);
+                                {//MARK fertigen Knoten entsprechend markieren
+                                    pC.getView().getContentPanel().getNodeById(neighbour).setColor(Color.GREEN);
+                                }
+                                //Knoten als fertig deklarieren
                                 done.add(neighbour);
                             }
                         }
 
-                        //updateViz(1d);
+                        //wenn untersuchter Nachbar weder fertig, noch bereits in To-do-Liste enthalten
                         if(!done.contains(neighbour)&&!toDo.contains(neighbour)){
                             toDo.add(neighbour);
                         }
                     }
-
                 }
 
                 done.add(cur);
-                pC.getView().getContentPanel().getNodeById(cur).setColor(Color.GREEN);
-                pC.getView().getContentPanel().getNodeById(cur).setMarked(false);
+                {//MARK fertigen Knoten als solchen markieren
+                    pC.getView().getContentPanel().getNodeById(cur).setColor(Color.GREEN);
+                    pC.getView().getContentPanel().getNodeById(cur).setMarked(false);
+                }
             }
 
             return dists;
         }
 
+        /**
+         * fügt eine (durch delay Attribut beeinflusste) Verzögerung ein und ruft einen Redraw auf
+         * @param pDuration Verzögerung in ms / delay Attribut
+         */
         private void updateViz(double pDuration){
-            if(this.delayMod == 0)return;
+            if(this.delayMod == 0)return;//wenn Verzögerung auf 0, abbrechen
+
             this.controller.getView().redraw(RedrawModes.RESCALE);
             try {
                 Thread.sleep((int)(pDuration*this.delayMod));
