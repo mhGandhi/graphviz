@@ -1,6 +1,7 @@
 import app.Controller;
 import app.Tool;
 import app.model.Edge;
+import app.view.NodeComponent;
 import app.view.RedrawModes;
 import app.view.Theme;
 import app.view.point.InSysPoint;
@@ -15,7 +16,7 @@ public class LivePath implements Tool{
      * Modifikator, um welchen die Verzögerungen in der Animation verändert werden.
      * 0 um Animation auszuschalten.
      */
-    private final int delay = 500;
+    private final int delay = 200;
 
     /**
      * {@inheritDoc}
@@ -175,8 +176,63 @@ public class LivePath implements Tool{
                 updateViz(0.5d);
             }
 
-            {//Weg markieren
+            Stack<Integer> path = new Stack<Integer>();
+            {//Weg finden
+                int cur = destinationNode;
+                path.add(cur);
+                {//MARK
+                    controller.getView().getContentPanel().getNodeById(cur).setMarked(true);
+                    updateViz(2.5d);
+                }
 
+                while(cur != startNode){
+                    List<Edge> revInEdges = controller.getModel().getGraph().getRevInEdges(cur);
+                    revInEdges.sort(Comparator.comparingInt(Edge::getWeight).reversed());
+
+                    for(Edge ie: revInEdges){
+                        if(ie.getNode().getId()!=cur && dists.get(ie.getNode().getId())<=dists.get(cur)){
+                            {//MARK
+                                controller.getView().getContentPanel().setEdgeMarked(ie.getNode().getId(), cur, true);
+                                controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setMarked(true);
+                            }
+                            if(dists.get(ie.getNode().getId()) + ie.getWeight() == dists.get(cur)){
+                                {//MARK
+                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setLabel(
+                                            dists.get(ie.getNode().getId())+" + "+ie.getWeight()+" = "+dists.get(cur)
+                                    );
+                                    updateViz(2.5d);
+                                }
+                                cur = ie.getNode().getId();
+                                path.add(cur);
+                                break;
+                            }else{
+                                {//MARK
+                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setLabel(
+                                            dists.get(ie.getNode().getId())+" + "+ie.getWeight()+" ≠ "+dists.get(cur)
+                                    );
+                                    updateViz(2.5d);
+                                    controller.getView().getContentPanel().setEdgeMarked(ie.getNode().getId(), cur,false);
+                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setMarked(false);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            controller.modelToComponentList();
+
+            {//Pfad markieren
+                int lastNode = -1;
+                while(!path.isEmpty()){
+                    int currentNode = path.pop();
+                    if(lastNode>=0){
+                        controller.getView().getContentPanel().setEdgeMarked(lastNode, currentNode,true);
+                    }
+                    controller.getView().getContentPanel().getNodeById(currentNode).setMarked(true);
+                    lastNode = currentNode;
+                    updateViz(1.0d);
+                }
             }
 
             controller.getView().redraw(RedrawModes.RESCALE);
