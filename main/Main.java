@@ -13,7 +13,8 @@ public class Main {
         new Breitensuche(),
 		new Tiefensuche(),
         new LiveTiefensuche(),
-        new LivePath()
+        new LivePath(),
+        new RandomGraph()
         //,[...]
     };
 
