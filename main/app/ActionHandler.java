@@ -534,6 +534,7 @@ public class ActionHandler {
     public void removeDirEdge(int pN1, int pN2) {
         getController().getModel().getGraph().removeDirEdge(pN1, pN2);
         getController().syncEdgesToView();
+        setHasUnsavedChanges();
     }
 
     /**
@@ -544,6 +545,7 @@ public class ActionHandler {
     public void removeEdge(int pN1, int pN2) {
         getController().getModel().getGraph().removeEdge(pN1, pN2);
         getController().syncEdgesToView();
+        setHasUnsavedChanges();
     }
 
     /**
