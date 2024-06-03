@@ -139,8 +139,7 @@ public class LivePath implements Tool{
                 return;
             }
 
-            //schick blinken
-            {
+            {//schick blinken
                 Collection<Integer> visitedNodes = dists.keySet();
                 Map<Integer, Color> markCol = new TreeMap<>();
                 Map<Integer, String> col = new TreeMap<>();
@@ -176,7 +175,10 @@ public class LivePath implements Tool{
                 updateViz(0.5d);
             }
 
-            //todo weg rein
+            {//Weg markieren
+
+            }
+
             controller.getView().redraw(RedrawModes.RESCALE);
         }
 
@@ -254,8 +256,24 @@ public class LivePath implements Tool{
 
                         {//überprüfen, ob es sich bei aktuell untersuchtem Nachbar um Sackgasse handelt
                             boolean deadEnd = true;
-                            //für jede vom Nachbarn ausgehende Kante
-                            for (Edge check:pC.getModel().getGraph().getOutEdges(neighbour) ){
+
+                            Collection<Edge> toCheck = pC.getModel().getGraph().getOutEdges(neighbour);
+                            for(Edge ie:pC.getModel().getGraph().getRevInEdges(neighbour)){
+                                //falls zu betroffenem Knoten noch keine Kante ausgeht
+                                boolean alreadyOut = false;
+                                for(Edge out: toCheck){
+                                    if(ie.getNode().getId()==out.getNode().getId()){
+                                        alreadyOut = true;
+                                        break;
+                                    }
+                                }
+                                if(!alreadyOut){
+                                    toCheck.add(ie);
+                                }
+                            }
+
+                            //für alle anliegenden Kanten (priorisiert ausgehende)
+                            for (Edge check: toCheck){
                                 //wenn weder fertig, noch der Knoten von dem die Untersuchung ausging
                                 if(!done.contains(check.getNode().getId()) && check.getNode().getId()!=cur){
                                     deadEnd = false;
@@ -285,6 +303,7 @@ public class LivePath implements Tool{
                 }
             }
 
+            updateViz(1.5d);
             return dists;
         }
 
