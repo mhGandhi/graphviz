@@ -302,15 +302,16 @@ public class ContentPanel extends JPanel{
 
     /**
      * Bestimmt Markierungsstatus der Kante zwischen 2 Knoten
-     * @param pNode1Id
-     * @param pNode2Id
-     * @param pMark
+     * @param pNode1Id Id des Ausgangsknotens
+     * @param pNode2Id Id des Zielknotens
+     * @param pMark ob die Kante markiert sein soll
      */
     public void setEdgeMarked(int pNode1Id, int pNode2Id, boolean pMark){
         EdgeComponent e = null;
         for (EdgeComponent ec : getEdges()) {
-            if(ec.getFrom().getId()==pNode1Id&&ec.getTo().getId()==pNode2Id){
+            if(ec.getFrom().getId()==pNode1Id && ec.getTo().getId()==pNode2Id){
                 e = ec;
+                break;
             }
         }
         if(e == null)return;
@@ -325,14 +326,15 @@ public class ContentPanel extends JPanel{
 
     /**
      * Bestimmt Markierungsstatus der gerichteten Kante zwischen 2 Knoten
-     * @param pNode1Id
-     * @param pNode2Id
-     * @param pMark
+     * @param pNode1Id Id des Ausgangsknotens
+     * @param pNode2Id Id des Zielknotens
+     * @param pMark ob die Kante markiert sein soll
      */
     public void setDirEdgeMarked(int pNode1Id, int pNode2Id, boolean pMark){
         for (EdgeComponent ec : getEdges()) {
-            if(ec.getFrom().getId()==pNode1Id&&ec.getTo().getId()==pNode2Id){
+            if(ec.getFrom().getId()==pNode1Id && ec.getTo().getId()==pNode2Id){
                 ec.setMarked(pMark);
+                break;
             }
         }
     }
