@@ -298,6 +298,20 @@ public class Graph implements Serializable{
     }
 
     /**
+     * ob der Graph mit 0 gewichtete Kanten enthält
+     * @return Ergebnis
+     */
+    public boolean containsZeroEdges(){
+        for(List<Edge> edgeList : getAdjList().values()){
+            for (Edge edge : edgeList){
+                if(edge.getWeight()==0)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
