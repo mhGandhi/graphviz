@@ -313,7 +313,8 @@ public class LivePath implements Tool{
                         {//überprüfen, ob es sich bei aktuell untersuchtem Nachbar um Sackgasse handelt
                             boolean deadEnd = true;
 
-                            Collection<Edge> toCheck = pC.getModel().getGraph().getOutEdges(neighbour);
+                            //neue Liste um Interne nicht zu modifizieren //todo dagegen schützen vtl
+                            Collection<Edge> toCheck = new LinkedList<Edge>(pC.getModel().getGraph().getOutEdges(neighbour));
                             for(Edge ie:pC.getModel().getGraph().getRevInEdges(neighbour)){
                                 //falls zu betroffenem Knoten noch keine Kante ausgeht
                                 boolean alreadyOut = false;
