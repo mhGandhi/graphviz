@@ -12,6 +12,12 @@ import java.util.List;
 public class LivePath implements Tool{
 
     /**
+     * Modifikator, um welchen die Verzögerungen in der Animation verändert werden.
+     * 0 um Animation auszuschalten.
+     */
+    private final int delay = 500;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -32,7 +38,8 @@ public class LivePath implements Tool{
      */
     @Override
     public String getDescription(){
-        return "Sucht Live weg zwischen 2 Knoten (mit Dijkstra-Algorithmus). Geschwindigkeit kann angepasst werden.";
+        return "Sucht Live weg zwischen 2 Knoten (mit Dijkstra-Algorithmus)." +
+                "\nGeschwindigkeit ist anpassbar; aktuell "+delay+"%ige Verzögerung zwischen Schritten";
     }
 
     /**
@@ -96,7 +103,7 @@ public class LivePath implements Tool{
             return;
         }
         pC.removeMarkings();
-        Path pt = new Path(pNodeId, pC, destination, 1000);
+        Path pt = new Path(pNodeId, pC, destination, delay);
         pt.start();
     }
 
