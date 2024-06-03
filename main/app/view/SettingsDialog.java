@@ -286,7 +286,7 @@ public abstract class SettingsDialog{
                 public void valueChanged(ListSelectionEvent e) {
                     int i = toolList.getSelectedIndex();
                     if(i>=0){
-                        toolInfoTP.setText(r("info_author")+" "+pTools[i].getAuthor()+"\n\n"+r("info_description")+":\n"+pTools[i].getDescription()+"\n\n"+getToolusabilityString(pTools[i]));
+                        toolInfoTP.setText(r("info_author")+": "+pTools[i].getAuthor()+"\n\n"+r("info_description")+":\n"+pTools[i].getDescription()+"\n\n"+getToolusabilityString(pTools[i]));
                     }else{
                         toolInfoTP.setText("");
                     }
