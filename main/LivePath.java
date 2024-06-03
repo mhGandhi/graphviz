@@ -16,7 +16,7 @@ public class LivePath implements Tool{
      * Modifikator, um welchen die Verzögerungen in der Animation verändert werden.
      * 0 um Animation auszuschalten.
      */
-    private final int delay = 50;
+    private final int delay = 500;
 
     /**
      * {@inheritDoc}
@@ -97,7 +97,11 @@ public class LivePath implements Tool{
     @Override
     public void runOnNode(Controller pC, int pNodeId) {
         if(pC.getModel().getGraph().containsNegativeEdges()){
-            pC.getView().nativeNotification("Dijkstra funktioniert nicht mit negativen Kanten");
+            pC.getView().nativeNotification("Negative Kantengewichte unzulässig");
+            return;
+        }
+        if(pC.getModel().getGraph().containsZeroEdges()){
+            pC.getView().nativeNotification("Kantengewicht 0 unzulässig");
             return;
         }
 
@@ -136,10 +140,12 @@ public class LivePath implements Tool{
 
         @Override
         public void run() {
-            Map<Integer,Integer> dists = dijkDists(startNode, controller);
+            Map<Integer,Integer> dists = dijkDists(startNode, destinationNode, controller);
 
             if(dists.get(destinationNode)==null){
                 controller.getView().nativeNotification("Kein Pfad zum Ziel");
+                controller.modelToComponentList();
+                controller.getView().redraw(RedrawModes.RESCALE);
                 return;
             }
 
@@ -179,51 +185,7 @@ public class LivePath implements Tool{
                 updateViz(0.5d);
             }
 
-            Stack<Integer> path = new Stack<Integer>();
-            {//Weg finden
-                int cur = destinationNode;
-                path.add(cur);
-                {//MARK
-                    controller.getView().getContentPanel().getNodeById(cur).setMarked(true);
-                    updateViz(2.5d);
-                }
-
-                int last = -1;
-                while(cur != startNode){
-                    List<Edge> revInEdges = controller.getModel().getGraph().getRevInEdges(cur);
-                    revInEdges.sort(Comparator.comparingInt(Edge::getWeight).reversed());
-
-                    for(Edge ie: revInEdges){
-                        if(ie.getNode().getId()!=last && dists.get(ie.getNode().getId())<=dists.get(cur)){
-                            {//MARK
-                                controller.getView().getContentPanel().setEdgeMarked(ie.getNode().getId(), cur, true);
-                                controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setMarked(true);
-                            }
-                            if(dists.get(ie.getNode().getId()) + ie.getWeight() == dists.get(cur)){
-                                {//MARK
-                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setLabel(
-                                            dists.get(ie.getNode().getId())+" + "+ie.getWeight()+" = "+dists.get(cur)
-                                    );
-                                    updateViz(2.5d);
-                                }
-                                last = cur;
-                                cur = ie.getNode().getId();
-                                path.add(cur);
-                                break;
-                            }else{
-                                {//MARK
-                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setLabel(
-                                            dists.get(ie.getNode().getId())+" + "+ie.getWeight()+" ≠ "+dists.get(cur)
-                                    );
-                                    updateViz(2.5d);
-                                    controller.getView().getContentPanel().setEdgeMarked(ie.getNode().getId(), cur,false);
-                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setMarked(false);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            Stack<Integer> path = dijkPath(dists, startNode, destinationNode);
 
             controller.modelToComponentList();
 
@@ -243,13 +205,60 @@ public class LivePath implements Tool{
             controller.getView().redraw(RedrawModes.RESCALE);
         }
 
+        private Stack<Integer> dijkPath(Map<Integer,Integer> dists, int pStartNode, int pDestinationNode){
+            Stack<Integer> path = new Stack<Integer>();
+            {//Weg finden
+                int cur = pDestinationNode;
+                path.add(cur);
+                {//MARK
+                    controller.getView().getContentPanel().getNodeById(cur).setMarked(true);
+                    updateViz(2.5d);
+                }
+
+                while(cur != pStartNode){
+                    List<Edge> revInEdges = controller.getModel().getGraph().getRevInEdges(cur);
+                    revInEdges.sort(Comparator.comparingInt(Edge::getWeight).reversed());
+
+                    for(Edge ie: revInEdges){
+                        if(dists.get(ie.getNode().getId())!=null && dists.get(ie.getNode().getId())<dists.get(cur)){
+                            {//MARK
+                                controller.getView().getContentPanel().setEdgeMarked(ie.getNode().getId(), cur, true);
+                                controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setMarked(true);
+                            }
+                            if(dists.get(ie.getNode().getId()) + ie.getWeight() == dists.get(cur)){
+                                {//MARK
+                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setLabel(
+                                            dists.get(ie.getNode().getId())+" + "+ie.getWeight()+" = "+dists.get(cur)
+                                    );
+                                    updateViz(2.5d);
+                                }
+                                cur = ie.getNode().getId();
+                                path.add(cur);
+                                break;
+                            }else{
+                                {//MARK
+                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setLabel(
+                                            dists.get(ie.getNode().getId())+" + "+ie.getWeight()+" ≠ "+dists.get(cur)
+                                    );
+                                    updateViz(2.5d);
+                                    controller.getView().getContentPanel().setEdgeMarked(ie.getNode().getId(), cur,false);
+                                    controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setMarked(false);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return path;
+        }
+
         /**
          * Errechnet mindeste Distanz zum Startknoten mithilfe des Dijkstra-Algorithms
          * @param pStartNode Anfangsknoten
          * @param pC Controller
          * @return Zuordnung der Knoten-Ids zu ihren entsprechenden Distanzen
          */
-        private Map<Integer,Integer> dijkDists(int pStartNode, Controller pC){//todo modus der nur mindest erforderliche distanzen errechnet???
+        private Map<Integer,Integer> dijkDists(int pStartNode, int pDestinationNode, Controller pC){
             Map<Integer,Integer> dists = new TreeMap<Integer,Integer>();
             Collection<Integer> done = new LinkedList<Integer>();
             List<Integer> toDo = new LinkedList<Integer>();
@@ -362,6 +371,9 @@ public class LivePath implements Tool{
                 {//MARK fertigen Knoten als solchen markieren
                     pC.getView().getContentPanel().getNodeById(cur).setColor(Color.GREEN);
                     pC.getView().getContentPanel().getNodeById(cur).setMarked(false);
+                }
+                if(done.contains(pDestinationNode)){
+                    return dists;
                 }
             }
 
