@@ -153,9 +153,7 @@ public class ViewListener implements ActionListener, KeyListener, MouseListener,
                 break;
             case 82: //r
                 if(keyMod_strg){
-                    getViewState().resetCam();
-                    getActionHandler().modelToComponentList();
-                    getActionHandler().redraw_Rescale();
+                    actionPerformed(new ActionEvent(this,0,"view_reset"));
                 }
                 break;
             case 87: //w
