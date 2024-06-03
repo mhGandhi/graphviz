@@ -333,10 +333,19 @@ public class View{
 
     /**
      * Erstellt Notification Fenster
-     * @param pNotification
+     * @param pNotification Tag der Benachrichtigung
      */
     public void notification(String pNotification){
         JOptionPane.showMessageDialog(window, r(pNotification), r("notif"), JOptionPane.WARNING_MESSAGE);
+        viewListener.actionPerformed(new ActionEvent(this, 0, "rmKeyMods"));
+    }
+
+    /**
+     * Erstellt Benachrichtigungsfenster zum Anzeigen von Text
+     * @param pNotificationText Text der Benachrichtigung
+     */
+    public void nativeNotification(String pNotificationText){
+        JOptionPane.showMessageDialog(window, pNotificationText, r("notif"), JOptionPane.WARNING_MESSAGE);
         viewListener.actionPerformed(new ActionEvent(this, 0, "rmKeyMods"));
     }
 
@@ -383,7 +392,7 @@ public class View{
 
     /**
      * Ruft einen Dialog, der den Nutzer zur Angabe eines Knotes auffordert auf
-     * @return -1 wenn abgebrochen
+     * @return id des gewählten Knotens; -1 wenn abgebrochen
      */
     public int nodeDialog(){
         String tit = window.getTitle();
