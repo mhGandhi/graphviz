@@ -16,7 +16,7 @@ public class LivePath implements Tool{
      * Modifikator, um welchen die Verzögerungen in der Animation verändert werden.
      * 0 um Animation auszuschalten.
      */
-    private final int delay = 200;
+    private final int delay = 50;
 
     /**
      * {@inheritDoc}
@@ -188,12 +188,13 @@ public class LivePath implements Tool{
                     updateViz(2.5d);
                 }
 
+                int last = -1;
                 while(cur != startNode){
                     List<Edge> revInEdges = controller.getModel().getGraph().getRevInEdges(cur);
                     revInEdges.sort(Comparator.comparingInt(Edge::getWeight).reversed());
 
                     for(Edge ie: revInEdges){
-                        if(ie.getNode().getId()!=cur && dists.get(ie.getNode().getId())<=dists.get(cur)){
+                        if(ie.getNode().getId()!=last && dists.get(ie.getNode().getId())<=dists.get(cur)){
                             {//MARK
                                 controller.getView().getContentPanel().setEdgeMarked(ie.getNode().getId(), cur, true);
                                 controller.getView().getContentPanel().getNodeById(ie.getNode().getId()).setMarked(true);
@@ -205,6 +206,7 @@ public class LivePath implements Tool{
                                     );
                                     updateViz(2.5d);
                                 }
+                                last = cur;
                                 cur = ie.getNode().getId();
                                 path.add(cur);
                                 break;
