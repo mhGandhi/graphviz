@@ -311,7 +311,7 @@ public class ActionHandler {
         String newName;
         try {
             if(pN.length==1){
-                newName = getController().getView().stringDialog(getNodeById(pN[0]).getLabel());
+                newName = getController().getView().stringDialog(getController().getModel().getNodePresentation(pN[0]).getLabel());
             }else{
                 newName = getController().getView().stringDialog("");
             }
