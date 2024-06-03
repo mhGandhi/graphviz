@@ -313,6 +313,7 @@ public class ContentPanel extends JPanel{
                 e = ec;
             }
         }
+        if(e == null)return;
         if(e.isBidirect()){
             setDirEdgeMarked(pNode1Id, pNode2Id, pMark);
             setDirEdgeMarked(pNode2Id, pNode1Id, pMark);
