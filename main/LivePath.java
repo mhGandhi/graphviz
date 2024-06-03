@@ -96,8 +96,11 @@ public class LivePath implements Tool{
      */
     @Override
     public void runOnNode(Controller pC, int pNodeId) {
-        if(pC.getModel().getGraph().containsNegativeEdges())
+        if(pC.getModel().getGraph().containsNegativeEdges()){
             pC.getView().nativeNotification("Dijkstra funktioniert nicht mit negativen Kanten");
+            return;
+        }
+
         int destination = pC.getView().nodeDialog();
         if(destination<0){
             pC.getView().nativeNotification("Kein Zielknoten ausgewählt");
