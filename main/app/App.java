@@ -7,6 +7,6 @@ public class App {
     public App(Tool[] pTools){
         @SuppressWarnings("unused")
         Controller c = new Controller(pTools);
-        //todo restartfunc, instading vtl, imp ex schöner, auto light/dark, exclude # lines when reading, fix moving, auto dists
+        //todo restartfunc, instading vtl, imp ex schöner, auto light/dark, exclude # lines when reading, fix moving, auto dists, sicherheitsmaßnahmen gegen Tools (safe-aus, nicht mehrere gleichzeitig blalblabla), live breit, neurales netz tool
     }
 }
