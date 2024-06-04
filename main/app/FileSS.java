@@ -60,7 +60,8 @@ public abstract class FileSS {
         try (BufferedReader reader = Files.newBufferedReader(Paths.get(pPath), StandardCharsets.UTF_8)) {
             String line;
             while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
+                if(!line.startsWith("#"))
+                    sb.append(line).append("\n");
             }
         } catch (IOException e) {
             //e.printStackTrace();
